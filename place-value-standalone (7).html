@@ -1,0 +1,654 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>درس القيمة المنزلية (نسخة ملف واحد)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#f8fafc;--ink:#0f172a;--muted:#64748b;--brand:#2563eb;
+      --card:#ffffff;--border:#e5e7eb;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--bg);color:var(--ink);
+         font-family:"Cairo",system-ui,-apple-system,Segoe UI,Roboto,Arial}
+    .container{max-width:1100px;margin:0 auto;padding:16px}
+    .hero{
+      background:linear-gradient(90deg,#f59e0b,#fb923c);
+      border-bottom:4px solid #f59e0b;
+      color:#fff; position:relative;
+    }
+    .hero .inner{text-align:center;padding:32px 16px;position:relative}
+    .logo-top{position:absolute;top:8px;right:8px;height:56px;width:auto;border-radius:8px;
+              background:#fff;padding:4px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+    h1,h2,h3{font-weight:900;margin:0 0 8px}
+    .grid{display:grid;gap:16px}
+    @media(min-width:768px){.grid-2{grid-template-columns:repeat(2,1fr)}}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:18px;
+          box-shadow:0 10px 24px rgba(2,32,71,.06)}
+    .tile-btn{display:block;padding:18px;border-radius:18px;color:#fff;font-weight:800;
+              text-align:right;position:relative;overflow:hidden;border:none;cursor:pointer;
+              transition:.2s transform,.2s box-shadow}
+    .tile-btn:hover{transform:scale(1.02);box-shadow:0 16px 28px rgba(2,32,71,.12)}
+    .bg-blue{background:linear-gradient(135deg,#3b82f6,#2563eb)}
+    .bg-green{background:linear-gradient(135deg,#16a34a,#22c55e)}
+    .bg-purple{background:linear-gradient(135deg,#8b5cf6,#a855f7)}
+    .bg-red{background:linear-gradient(135deg,#ef4444,#f97316)}
+    .badge{position:absolute;top:8px;left:8px;background:#0008;color:#ffeb3b;padding:4px 8px;border-radius:999px;font-size:12px}
+    .disabled{opacity:.55;cursor:not-allowed;filter:grayscale(.3)}
+    .topbar{background:#fff;border-bottom:4px solid #3b82f6;position:sticky;top:0;z-index:10}
+    .topbar-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:10px;justify-content:space-between;padding:10px 16px}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:#fff;cursor:pointer;font-weight:800}
+    .btn.primary{background:#2563eb;color:#fff;border-color:#2563eb}
+    .btn.danger{background:#ef4444;color:#fff;border-color:#ef4444}
+    .btn.yellow{background:#fbbf24;color:#111}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+    .progress{height:6px;background:#e5e7eb;position:relative}
+    .progress > i{position:absolute;height:100%;background:#3b82f6;left:0;top:0;width:0%}
+    .section{padding:16px}
+    .center{text-align:center}
+    .muted{color:var(--muted)}
+    .pill{display:inline-flex;align-items:center;gap:8px;padding:4px 10px;border-radius:999px;background:#eef2ff;border:1px solid #c7d2fe;color:#1e40af;font-weight:700}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .input, select{padding:10px 12px;border:1px solid var(--border);border-radius:10px}
+    .indicator{width:10px;height:10px;border-radius:50%;background:#ddd;display:inline-block;margin:0 2px;vertical-align:middle}
+    .indicator.active{background:#2563eb;width:28px;border-radius:999px}
+    .modal-bg{position:fixed;inset:0;background:#0007;display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
+    .modal{background:#fff;border-radius:18px;max-width:900px;width:100%;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+    .cert{width:794px;height:1123px;margin:0 auto;background:#fff;border:14px solid #fbbf24;border-radius:24px;padding:48px;
+           background-image:radial-gradient(circle at 20% 20%,#fff8e1,transparent 40%),radial-gradient(circle at 80% 30%,#e0f2fe,transparent 40%)}
+    .cert h1{font-size:32px;margin-bottom:8px}
+    .cert .line{display:flex;justify-content:space-between;margin-top:24px}
+    .details{display:none}
+    .card.open .details{display:block}
+  
+    .app-footer{ text-align:center; font-weight:700; color: var(--muted);
+      background:#fff; border-top:1px solid var(--border); padding:12px; }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <!-- Modal شهادة -->
+  <div id="certModal" class="modal-bg" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="row" style="justify-content:space-between">
+        <div class="row"><span style="font-weight:900">شهادة إنجاز</span></div>
+        <button class="btn" onclick="UI.hideCert()">إغلاق</button>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <label style="display:flex;flex-direction:column;gap:6px">
+          <span class="muted">اسم الطالبة</span>
+          <input id="certStudent" class="input" placeholder="مثال: سارة محمد">
+        </label>
+        <label style="display:flex;flex-direction:column;gap:6px">
+          <span class="muted">اسم المعلمة</span>
+          <input id="certTeacher" class="input" placeholder="مثال: أ/ فاطمة هزازي">
+        </label>
+        <label style="display:flex;flex-direction:column;gap:6px">
+          <span class="muted">التاريخ</span>
+          <input id="certDate" class="input">
+        </label>
+      </div>
+
+      <div id="certPreview" class="cert card" style="margin-top:12px">
+        <img src="https://b.top4top.io/p_3560vmoqm1.png" alt="الشعار" style="height:80px;width:auto;display:block;margin:0 auto 12px;background:#fff;padding:4px;border-radius:8px">
+        <div class="pill" style="margin:10px auto;display:inline-flex"><span>شهادة إنجاز</span></div>
+        <h1>شهادة إنجاز</h1>
+        <p class="muted">تُمنح هذه الشهادة إلى</p>
+        <h2 id="certName" style="color:#1d4ed8;margin:8px 0 16px">اسم الطالبة</h2>
+        <p>تقديرًا لإتمام جميع أقسام <b>درس القيمة المنزلية (عشرات الآلاف)</b></p>
+        <div style="margin:16px auto;color:#374151;max-width:80%">
+          نتقدم بخالص التهنئة على الجهد والمثابرة، ونتمنى دوام التفوق والنجاح.
+        </div>
+        <div class="row center" style="justify-content:center;margin:10px 0;color:#059669">
+          <span class="pill">الدرس</span>
+          <span class="pill">الأهداف</span>
+          <span class="pill">الألعاب</span>
+          <span class="pill">الاختبار</span>
+        </div>
+        <div class="line">
+          <div>التاريخ: <b id="certDateOut">____ / ____ / ____</b></div>
+          <div>المعلمة: <b id="certTeacherOut">اسم المعلمة</b></div>
+        </div>
+        <div class="muted" style="margin-top:40px;font-size:12px">تم إنشاء هذه الشهادة تلقائيًا من التطبيق التفاعلي — برمجة :أ/ فاطمة هزازي ,ملتقى معلمي ومعلمات الرياضيات ,ملتقى التعليم التفاعلي</div>
+      </div>
+
+      <div class="center" style="margin-top:10px">
+        <button class="btn primary" onclick="UI.printCert()">طباعة</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  "use strict";
+  const $ = (s, r=document) => r.querySelector(s);
+  const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+  const fmt = (n) => Number(n).toLocaleString('ar-SA');
+
+  const store = {
+    get(key, def){ try{ return JSON.parse(localStorage.getItem(key)||'null') ?? def; }catch{ return def; } },
+    set(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
+  };
+
+  const state = {
+    section: 'home',
+    completed: store.get('pv.completed', []),
+    lockQuiz: store.get('pv.lockQuiz', false),
+  };
+
+  const prereqsDone = () => ['lesson','objectives','games'].every(id => state.completed.includes(id));
+
+  function toggleCard(el){
+    const isOpen = el.classList.toggle('open');
+    el.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  }
+
+  function markCompleted(id){
+    if(!state.completed.includes(id)){ state.completed.push(id); store.set('pv.completed', state.completed); render(); }
+  }
+
+  window.UI = {
+    go: (id) => { state.section = id; render(); },
+    toggleLock: () => { state.lockQuiz = !state.lockQuiz; store.set('pv.lockQuiz', state.lockQuiz); render(); },
+    resetProgress: () => { state.completed = []; store.set('pv.completed', state.completed); render(); },
+    showCert: () => {
+      if(progressPct()!==100) return;
+      const d = new Date().toLocaleDateString('ar-SA');
+      $('#certDate').value = d;
+      $('#certStudent').value = '';
+      $('#certTeacher').value = '';
+      updateCertPreview();
+      $('#certModal').style.display='flex';
+    },
+    hideCert: () => { $('#certModal').style.display='none'; },
+    printCert: () => {
+      const html = $('#certPreview').outerHTML;
+      const w = window.open('', '_blank', 'width=900,height=1200');
+      w.document.write(`<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8">
+        <title>شهادة</title>
+        <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+        <style>body{font-family:"Cairo",system-ui;}</style>
+        </head><body>${html}<script>window.onload=()=>{window.print();window.close();}<\/script></body></html>`);
+      w.document.close();
+    },
+  };
+
+  function progressPct(){ return Math.round((state.completed.length/4)*100); }
+
+  function layoutTop(showNav){
+    let top = '';
+    if(showNav){
+      top += `<div class="topbar">
+        <div class="topbar-inner">
+          <button class="btn primary" onclick="UI.go('home')">العودة للرئيسية</button>
+          <div class="row">
+            <button class="btn ${state.lockQuiz?'danger':''}" onclick="UI.toggleLock()">
+              ${state.lockQuiz?'🔒 مقفول':'🔓 غير مقفول'} الاختبار
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="progress"><i style="width:${progressPct()}%"></i></div>`;
+    }
+    return top;
+  }
+
+  function renderHome(){
+    const disabledQuiz = state.lockQuiz && !prereqsDone();
+    const tiles = [
+      {id:'lesson', title:'الدرس',      icon:'📘', cls:'bg-blue', disabled:false},
+      {id:'objectives', title:'الأهداف', icon:'🎯', cls:'bg-green', disabled:false},
+      {id:'games', title:'الألعاب',    icon:'🎮', cls:'bg-purple', disabled:false},
+      {id:'quiz', title:'الاختبار',   icon:'📝', cls:'bg-red', disabled: disabledQuiz}
+    ];
+    let tilesHtml = '';
+    tiles.forEach((t,i)=>{
+      tilesHtml += `
+        <button class="tile-btn ${t.cls} ${t.disabled?'disabled':''}" ${t.disabled?'disabled':''} ${!t.disabled?`onclick="UI.go('${t.id}')"`:''}>
+          ${state.completed.includes(t.id)?'<span class="badge">🏆 مكتمل</span>':''}
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div style="font-size:44px">${t.icon}</div>
+            <div style="font-size:32px;opacity:.2;font-weight:900">${i+1}</div>
+          </div>
+          <div style="margin-top:10px;font-size:20px;font-weight:900">${t.title}</div>
+          <div class="muted" style="font-size:12px;margin-top:6px">ابدئي الآن</div>
+        </button>
+      `;
+    });
+
+    const homeHtml = `
+      <header class="hero">
+        <div class="inner">
+          <img src="https://b.top4top.io/p_3560vmoqm1.png" alt="الشعار" class="logo-top">
+          <div style="font-size:64px;line-height:1">📚</div>
+          <h1>درس القيمة المنزلية</h1>
+          <div class="muted">ضمن عشرات الآلاف — للصف الثالث الابتدائي</div>
+        </div>
+      </header>
+      <section class="container section">
+        <div class="grid grid-2">${tilesHtml}</div>
+
+        <div class="card" style="margin-top:16px;padding:16px">
+          <div class="row" style="justify-content:space-between">
+            <div><b>التقدّم:</b> ${progressPct()}% — أنهيتِ ${state.completed.length} من 4 أقسام</div>
+            <button class="btn" onclick="UI.resetProgress()">إعادة التعيين</button>
+          </div>
+          <div class="progress" style="margin-top:10px"><i style="width:${progressPct()}%"></i></div>
+
+          ${progressPct()===100 ? `
+            <div class="center" style="margin-top:12px">
+              <button class="btn yellow" onclick="UI.showCert()">🖨️ طباعة الشهادة</button>
+            </div>` : ''}
+        </div>
+      </section>`;
+
+    $('#app').innerHTML = homeHtml;
+  }
+
+  /* ------------ LESSON (slides) ------------ */
+  window.Lesson = (function(){
+    const slides=[
+      {title:'مقدمة - ما هي القيمة المنزلية؟', html:`
+        <div class='center'>
+          <div style='font-size:72px'>🏠</div>
+          <h2 style='color:#2563eb'>القيمة المنزلية</h2>
+          <p class='muted'>كل رقم في العدد له مكان خاص به يسمى «المنزلة».</p>
+          <div class='card' style='padding:12px;margin-top:8px;background:#fff3c4'>مثل البيت الذي له غرف مختلفة، كل رقم له مكانه الخاص!</div>
+        </div>`},
+      {title:'منازل الأرقام', html:`
+        <h2 class='center' style='color:#7c3aed'>منازل الأرقام ضمن عشرات الآلاف</h2>
+        <div class='grid grid-2' style='grid-template-columns:repeat(5,1fr);gap:8px;text-align:center;margin-top:10px'>
+          ${['الآحاد','العشرات','المئات','الآلاف','عشرات الآلاف'].map((name,i)=>{
+            const colors=['#dbeafe','#dcfce7','#fef9c3','#ffedd5','#fee2e2'];
+            const val=[1,10,100,1000,10000][i];
+            return `<div class='card' style='padding:10px;background:${colors[i]}'>
+              <div style='font-weight:900'>${name}</div>
+              <div class='muted'>${fmt(val)}</div>
+            </div>`;
+          }).join('')}
+        </div>`},
+      {title:'مثال تطبيقي - 47,352', html:`
+        <h2 class='center' style='color:#16a34a'>لنحلل العدد ${fmt(47352)}</h2>
+        <div class='card' style='padding:16px'>
+          <div class='center' style='font-size:40px;font-weight:900;margin:8px 0'>${fmt(47352)}</div>
+          <div class='grid' style='grid-template-columns:repeat(5,1fr);gap:8px;text-align:center'>
+            ${[[2,'الآحاد',1],[5,'العشرات',10],[3,'المئات',100],[7,'الآلاف',1000],[4,'عشرات الآلاف',10000]].map(([d,l,p])=>
+              `<div class='card' style='padding:10px'>
+                <div style='font-size:28px;font-weight:900'>${fmt(d)}</div>
+                <div class='muted'>${l}</div>
+                <div class='muted' style='font-size:12px'>${fmt(d)} × ${fmt(p)} = ${fmt(d*p)}</div>
+              </div>`).join('')}
+          </div>
+          <div class='center' style='margin-top:10px;background:linear-gradient(90deg,#3b82f6,#8b5cf6);color:#fff;padding:10px;border-radius:12px'>
+            ${fmt(47352)} = ${fmt(40000)} + ${fmt(7000)} + ${fmt(300)} + ${fmt(50)} + ${fmt(2)}
+          </div>
+        </div>`},
+      {title:'بطاقات تفاعلية', html:`
+        <div class='center'><b>اضغطي على البطاقة لرؤية التحليل</b></div>
+        <div class='grid' style='grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px'>
+          ${[23456,51789,90123].map(n=>cardBreakdown(n)).join('')}
+        </div>`}
+    ];
+
+    function cardBreakdown(n){
+      const s=String(n).padStart(5,'0').split('');
+      const labels=['عشرات الآلاف','الآلاف','المئات','العشرات','الآحاد'];
+      return `<div class='card' style='padding:12px;background:linear-gradient(135deg,#ec4899,#8b5cf6);color:#fff;cursor:pointer' role='button' tabindex='0' aria-expanded='false' onclick='toggleCard(this)' onkeydown='if(event.key==="Enter"||event.key===" ") toggleCard(this)'>
+        <div class='center' style='font-size:28px;font-weight:900'>${fmt(n)}</div>
+        <div class='details' style='margin-top:8px;background:#ffffff30;border-radius:12px;padding:8px'>
+          ${[4,3,2,1,0].map((i,idx)=>`<div style='font-size:12px'>${labels[idx]}: ${fmt(Number(s[i]))}</div>`).join('')}
+        </div>
+      </div>`;
+    }
+
+    let idx=0, completed=false;
+    function render(){
+      const prog = Math.round(((idx+1)/slides.length)*100);
+      const html = `
+        ${layoutTop(true)}
+        <div class='container section'>
+          <div class='card' style='padding:16px'>
+            <div class='row' style='justify-content:space-between'>
+              <h3>${slides[idx].title}</h3>
+              <div class='muted'>${fmt(idx+1)} / ${fmt(slides.length)}</div>
+            </div>
+            <div style='margin-top:8px'>${slides[idx].html}</div>
+            <div class='row' style='justify-content:space-between;margin-top:12px'>
+              <button class='btn' onclick='Lesson.prev()' ${idx===0?'disabled':''}>السابق</button>
+              <div>${slides.map((_,i)=>`<span class='indicator ${i===idx?"active":""}'></span>`).join('')}</div>
+              <button class='btn primary' onclick='Lesson.next()'>${idx===slides.length-1? (completed?'مكتمل':'إنهاء الدرس') :'التالي'}</button>
+            </div>
+            <div class='progress' style='margin-top:10px'><i style='width:${prog}%'></i></div>
+          </div>
+        </div>`;
+      $('#app').innerHTML = html;
+    }
+    return {
+      mount: () => render(),
+      next: () => { if(idx<slides.length-1) idx++; else if(!completed){completed=true; markCompleted('lesson');} render(); },
+      prev: () => { if(idx>0) idx--; render(); },
+    }
+  })();
+
+  /* ------------ OBJECTIVES ------------ */
+  window.Objectives = (function(){
+    let checks=[false,false,false,false];
+    function mount(){
+      $('#app').innerHTML = layoutTop(true)+`
+        <div class='container section'>
+          <div class='card' style='padding:16px'>
+            <div class='row'><h3>الأهداف التعليمية</h3></div>
+            <ul style='list-style:none;padding:0;margin:10px 0'>
+              ${[
+                'تمييز منازل الأعداد حتى عشرات الآلاف (آحاد ← عشرات ← مئات ← آلاف ← عشرات الآلاف).',
+                'قراءة الأعداد وكتابتها بالصيغة القياسية (Standard form) وبالصيغة التحليلية.',
+                'تقدير القيم المنزلية وتمثيلها بصريًا (مكعبات/أعمدة/ألواح).',
+                'المقارنة بين عددين باستخدام (>، <، =) وتبرير الاختيار.'
+              ].map((t,i)=>`<li class='row'><input type='checkbox' ${checks[i]?'checked':''} onchange='Objectives.toggle(${i})'><span>${t}</span></li>`).join('')}
+            </ul>
+            <div class='row' style='justify-content:space-between'>
+              <div class='muted'>${checks.filter(Boolean).length} / 4 مكتملة</div>
+              <button class='btn primary' onclick='Objectives.done()' ${checks.every(Boolean)?'':'disabled'}>تم الإنجاز</button>
+            </div>
+          </div>
+        </div>`;
+    }
+    return {
+      mount,
+      toggle:(i)=>{checks[i]=!checks[i]; mount();},
+      done:()=>{ if(checks.every(Boolean)) markCompleted('objectives'); mount(); },
+    }
+  })();
+
+  /* ------------ GAMES ------------ */
+  window.Games = (function(){
+    let scores=[0,0,0]; let current=0;
+    function mount(){
+      const total=scores.reduce((a,b)=>a+b,0);
+      const avg=(total/3)||0;
+      $('#app').innerHTML = layoutTop(true)+`
+        <div class='container section'>
+          <div class='card center' style='padding:16px;background:linear-gradient(90deg,#8b5cf6,#ec4899);color:#fff'>
+            <div style='font-size:40px'>🎮</div>
+            <h3>الألعاب التعليمية</h3>
+            ${total>0?`<div class='pill' style='background:#ffffff30;border-color:#ffffff50;color:#fff'>إجمالي: ${fmt(total)} • متوسط: ${avg.toFixed(1)}</div>`:''}
+          </div>
+
+          <div class='grid grid-2' style='margin-top:12px'>
+            ${['تحديد القيمة المنزلية','بناء الأرقام','مقارنة الأرقام'].map((t,i)=>`
+              <button class='tile-btn ${current===i?'bg-blue':'bg-green'}' onclick='Games.open(${i})'>
+                <div style='display:flex;justify-content:space-between'><div style='font-size:36px'>${['🎯','🔨','⚖️'][i]}</div><div style='opacity:.2;font-size:28px;font-weight:900'>${i+1}</div></div>
+                <div style='margin-top:6px;font-weight:900'>${t}</div>
+                ${scores[i]>0?`<div class='badge'>${fmt(scores[i])} نقطة</div>`:''}
+              </button>`).join('') }
+          </div>
+
+          <div class='card' style='margin-top:12px;padding:12px' id='gameMount'></div>
+        </div>`;
+      open(current);
+    }
+    function open(i){ current=i; mountGame(); }
+    function setScore(i,score){ scores[i]=Math.max(scores[i],Math.min(100,score)); if(scores.every(s=>s>0)) markCompleted('games'); mount(); }
+    function mountGame(){
+      if(current===0) GM_identify.mount();
+      else if(current===1) GM_build.mount();
+      else GM_compare.mount();
+    }
+
+    const GM_identify = (function(){
+      const qs=[
+        {n:34567,d:4,pos:'الآلاف',opts:['الآحاد','العشرات','المئات','الآلاف']},
+        {n:89123,d:9,pos:'الآلاف',opts:['الآحاد','العشرات','الآلاف','المئات']},
+        {n:67890,d:8,pos:'المئات',opts:['المئات','الآلاف','العشرات','الآحاد']},
+        {n:12345,d:3,pos:'المئات',opts:['الآحاد','العشرات','المئات','الآلاف']},
+        {n:56789,d:5,pos:'عشرات الآلاف',opts:['الآلاف','عشرات الآلاف','المئات','العشرات']}
+      ];
+      let idx=0,score=0,locked=false,choice=null;
+      function mount(){
+        if(idx>=qs.length) return end();
+        const q=qs[idx];
+        $('#gameMount').innerHTML = `
+          <div class='center'><h3>تحديد القيمة المنزلية</h3><div class='muted'>السؤال ${fmt(idx+1)} من ${fmt(qs.length)} | النقاط: ${fmt(score)}</div></div>
+          <div class='card center' style='padding:10px;background:#dbeafe;margin:10px 0'>
+            <div style='font-size:36px;font-weight:900'>${fmt(q.n)}</div>
+            <div>ما منزلة الرقم <b style='color:#dc2626'>${fmt(q.d)}</b>؟</div>
+          </div>
+          <div class='grid grid-2'>
+            ${q.opts.map(o=>`<button class='btn' onclick='Games.GM_identify.choose(\"${o}\")' ${locked?'disabled':''}>${o}</button>`).join('')}
+          </div>
+        `;
+      }
+      function choose(a){ if(locked) return; choice=a; locked=true; if(a===qs[idx].pos) score+=20; setTimeout(next,900); }
+      function next(){ idx++; locked=false; choice=null; if(idx>=qs.length) end(); else mount(); }
+      function end(){
+        $('#gameMount').innerHTML = `
+          <div class='center' style='padding:20px'>
+            <div style='font-size:64px'>🏆</div>
+            <h3>انتهيتِ من اللعبة!</h3>
+            <div style='margin:6px 0'>نقاطك: ${fmt(score)} من 100</div>
+            <button class='btn primary' onclick='Games.GM_identify.reset()'>إعادة</button>
+          </div>`;
+        setScore(0,score);
+      }
+      function reset(){ idx=0;score=0;locked=false;choice=null; mount(); }
+      return { mount, choose, reset }
+    })();
+
+    const GM_build = (function(){
+      let attempt=0,score=0,target=0,sel={tt:0,t:0,h:0,te:0,o:0};
+      function rand(){ return Math.floor(Math.random()*90000)+10000; }
+      function newTarget(){ target=rand(); sel={tt:0,t:0,h:0,te:0,o:0}; }
+      function mount(){
+        if(attempt===0) newTarget();
+        if(attempt>=5) return end();
+        $('#gameMount').innerHTML = `
+          <div class='center'><h3>بناء الأرقام</h3><div class='muted'>المحاولة ${fmt(attempt+1)} من 5 | النقاط: ${fmt(score)}</div></div>
+          <div class='card center' style='padding:10px;background:#fef3c7;margin:10px 0'>
+            <div>ابنِ الرقم:</div>
+            <div style='font-size:36px;font-weight:900'>${fmt(target)}</div>
+          </div>
+          <div class='grid' style='grid-template-columns:repeat(5,1fr);gap:8px'>
+            ${[
+              ['o','الآحاد','#dbeafe'],
+              ['te','العشرات','#dcfce7'],
+              ['h','المئات','#fef9c3'],
+              ['t','الآلاف','#ffedd5'],
+              ['tt','عشرات الآلاف','#fee2e2'],
+            ].map(([k,lab,color])=>`
+              <div class='card' style='padding:8px;background:${color}'>
+                <div style='font-weight:900;margin-bottom:4px'>${lab}</div>
+                <select onchange='Games.GM_build.set(\"${k}\",this.value)' class='input' style='width:100%'>${Array.from({length:10},(_,i)=>`<option value='${i}' ${i==sel[k]?'selected':''}>${fmt(i)}</option>`).join('')}</select>
+              </div>`).join('')}
+          </div>
+          <div class='center card' style='padding:10px;background:#f3f4f6;margin-top:10px'>
+            <div>الرقم المبني:</div>
+            <div style='font-size:32px;font-weight:900'>${fmt(sel.tt*10000+sel.t*1000+sel.h*100+sel.te*10+sel.o)}</div>
+          </div>
+          <div class='center' style='margin-top:8px'><button class='btn primary' onclick='Games.GM_build.check()'>تحقّق من الإجابة</button></div>
+        `;
+      }
+      function setSel(k,v){ sel[k]=parseInt(v||'0'); mount(); }
+      function currentVal(){ return sel.tt*10000+sel.t*1000+sel.h*100+sel.te*10+sel.o; }
+      function check(){
+        const ok = currentVal()===target;
+        if(ok) score+=20;
+        attempt++;
+        if(attempt>=5) end(); else { newTarget(); mount(); }
+      }
+      function end(){
+        $('#gameMount').innerHTML = `<div class='center' style='padding:20px'>
+          <div style='font-size:64px'>🏆</div><h3>انتهيتِ من اللعبة!</h3>
+          <div>نقاطك: ${fmt(score)} من 100</div>
+          </div>`;
+        setScore(1,score);
+      }
+      return { mount, set:setSel, check }
+    })();
+
+    const GM_compare = (function(){
+      let q=1,score=0,a=0,b=0;
+      function gen(){ a=Math.floor(Math.random()*90000)+10000; b=Math.floor(Math.random()*90000)+10000; }
+      function mount(){
+        if(q===1) gen();
+        if(q>5) return end();
+        $('#gameMount').innerHTML = `
+          <div class='center'><h3>مقارنة الأرقام</h3><div class='muted'>السؤال ${fmt(q)} من 5 | النقاط: ${fmt(score)}</div></div>
+          <div class='row center' style='justify-content:center;gap:16px;margin:10px 0'>
+            <div class='card' style='padding:10px;background:#dbeafe;font-size:32px;font-weight:900'>${fmt(a)}</div>
+            <div style='font-size:40px;color:#9ca3af'>؟</div>
+            <div class='card' style='padding:10px;background:#ede9fe;font-size:32px;font-weight:900'>${fmt(b)}</div>
+          </div>
+          <div class='row center' style='justify-content:center;gap:8px'>
+            ${['>','<','='].map(s=>`<button class='btn' onclick='Games.GM_compare.answer(\"${s}\")'>${s}</button>`).join('')}
+          </div>`;
+      }
+      function correct(){
+        return a>b?'>':a<b?'<':'=';
+      }
+      function answer(s){
+        if(s===correct()) score+=20;
+        q++; gen(); mount();
+      }
+      function end(){
+        $('#gameMount').innerHTML = `<div class='center' style='padding:20px'>
+          <div style='font-size:64px'>🏆</div><h3>انتهيتِ من اللعبة!</h3>
+          <div>نقاطك: ${fmt(score)} من 100</div>
+          </div>`;
+        setScore(2,score);
+      }
+      return { mount, answer }
+    })();
+
+    return { mount, open, GM_identify, GM_build, GM_compare }
+  })();
+
+  /* ------------ QUIZ ------------ */
+  window.Quiz = (function(){
+    const positions = ['الآحاد','العشرات','المئات','الآلاف','عشرات الآلاف'];
+    const mult=[1,10,100,1000,10000];
+    const rand=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+    const pick=(arr)=>arr[rand(0,arr.length-1)];
+    const shuffle=a=>a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(v=>v[1]);
+    const digits5=n=>String(n).padStart(5,'0').split('').reverse().map(Number);
+
+    function q_place(){
+      let n=rand(10000,99999), d=digits5(n), pos=rand(0,4), g=0;
+      while(d[pos]===0 && g<10){ n=rand(10000,99999); d=digits5(n); pos=rand(0,4); g++; }
+      const digit=d[pos];
+      const correct=positions[pos];
+      const choices=shuffle([correct,...positions.filter(p=>p!==correct)]).slice(0,4);
+      return { id:`p-${n}-${pos}`, prompt:`ما منزلة الرقم <b style='color:#dc2626'>${fmt(digit)}</b> في العدد <b>${fmt(n)}</b>؟`, choices, ans:choices.indexOf(correct), explain:`العدد ${fmt(n)} من اليمين: ${positions.join(' ← ')}.` };
+    }
+    function q_value(){
+      let n=rand(10000,99999), d=digits5(n), pos=rand(0,4), g=0;
+      while(d[pos]===0 && g<10){ n=rand(10000,99999); d=digits5(n); pos=rand(0,4); g++; }
+      const digit=d[pos], val=digit*mult[pos];
+      const dist = new Set([digit, digit*(mult[Math.min(4,pos+1)]||1), digit*(mult[Math.max(0,pos-1)]||1)]);
+      while(dist.size<3) dist.add(rand(1,9)*pick(mult));
+      const nums=shuffle([val,...Array.from(dist).slice(0,3)]);
+      return { id:`v-${n}-${pos}`, prompt:`ما قيمة الرقم <b style='color:#dc2626'>${fmt(digit)}</b> في العدد <b>${fmt(n)}</b>؟`, choices:nums.map(fmt), ans:nums.indexOf(val), explain:`قيمة الرقم = الرقم × قيمة المنزلة.` };
+    }
+    function q_expanded(){
+      const n=rand(10000,99999), d=digits5(n);
+      const parts=d.map((x,i)=>x*mult[i]).filter(x=>x>0).reverse();
+      const correct=parts.map(fmt).join(' + ');
+      const wrong1=parts.slice(1).map(fmt).join(' + ')||fmt(0);
+      let wrong2=parts.slice().reverse().map(fmt).join(' + ');
+      const wrong3=d.slice().reverse().map(fmt).join(' + ');
+      const choices=shuffle([correct,wrong1,wrong2,wrong3]).slice(0,4);
+      return { id:`e-${n}`, prompt:`ما الصيغة التحليلية للعدد <b>${fmt(n)}</b>؟`, choices, ans:choices.indexOf(correct), explain:`${fmt(n)} = ${correct}` }
+    }
+    function q_compare(){
+      const a=rand(10000,99999), b=rand(10000,99999);
+      const cmp=a>b?'>':a<b?'<':'=';
+      const choices=shuffle(['>','<','=']);
+      return { id:`c-${a}-${b}`, prompt:`اختاري الرمز الصحيح: <b>${fmt(a)}</b> ____ <b>${fmt(b)}</b>`, choices, ans:choices.indexOf(cmp), explain:`الأكبر هو ${fmt(Math.max(a,b))}.` }
+    }
+    function makePool(){
+      const arr=[]; for(let i=0;i<3;i++) arr.push(q_place());
+      for(let i=0;i<3;i++) arr.push(q_value());
+      for(let i=0;i<2;i++) arr.push(q_expanded());
+      for(let i=0;i<2;i++) arr.push(q_compare());
+      return shuffle(arr);
+    }
+
+    let bank=makePool(), idx=0, score=0, locked=false, selected=null;
+    function mount(){
+      const q=bank[idx];
+      $('#app').innerHTML = layoutTop(true)+`
+        <div class='container section'>
+          <div class='row' style='justify-content:space-between'>
+            <div class='pill'>السؤال ${fmt(idx+1)} / ${fmt(bank.length)}</div>
+            <div class='pill'>النقاط: ${fmt(score)}</div>
+          </div>
+          <div class='card' style='padding:16px;margin-top:10px'>
+            <div class='center' style='font-size:18px'>${q.prompt}</div>
+            <div class='grid grid-2' style='margin-top:12px'>
+              ${q.choices.map((c,i)=>`<button class='btn' onclick='Quiz.submit(${i})' ${locked?'disabled':''}>${c}</button>`).join('')}
+            </div>
+            ${locked && q.explain? `<div class='muted' style='margin-top:8px'>${q.explain}</div>`:''}
+            <div class='row' style='justify-content:space-between;margin-top:12px'>
+              <button class='btn' onclick='Quiz.prev()' ${idx===0?'disabled':''}>السابق</button>
+              ${locked?`<button class='btn primary' onclick='Quiz.next()'>${idx===bank.length-1?'إنهاء':'التالي'}</button>`:'<span class="muted">اختاري إجابة…</span>'}
+            </div>
+            <div class='progress' style='margin-top:10px'><i style='width:${((idx+(locked?1:0))/bank.length)*100}%'></i></div>
+          </div>
+        </div>`;
+    }
+    function submit(i){ if(locked) return; selected=i; locked=true; if(i===bank[idx].ans) score+=10; mount(); }
+    function next(){
+      if(idx<bank.length-1){ idx++; locked=false; selected=null; mount(); }
+      else { end(); }
+    }
+    function prev(){ if(idx===0) return; idx--; locked=false; selected=null; mount(); }
+    function end(){
+      const pct=Math.round((score/(bank.length*10))*100);
+      $('#app').innerHTML = layoutTop(true)+`
+        <div class='container section center'>
+          <div style='font-size:64px'>🏆</div>
+          <h3>انتهى الاختبار!</h3>
+          <div style='margin:6px 0'>نتيجتك: <b>${fmt(score)}</b> من ${fmt(bank.length*10)} (${pct}%)</div>
+          <div class='card' style='margin:10px auto;max-width:800px;padding:10px;text-align:right'>
+            <b>مراجعة سريعة:</b>
+            <ol>${bank.map((qq,i)=>`<li style='margin:6px 0'>سؤال ${fmt(i+1)} — الإجابة الصحيحة: <b>${qq.choices[qq.ans]}</b></li>`).join('')}</ol>
+          </div>
+          <div class='row center' style='justify-content:center'>
+            <button class='btn primary' onclick='Quiz.reset()'>إعادة المحاولة</button>
+          </div>
+        </div>`;
+      markCompleted('quiz');
+    }
+    function reset(){
+      bank=makePool(); idx=0; score=0; locked=false; selected=null; mount();
+    }
+    return { mount, submit, next, prev, reset }
+  })();
+
+  function updateCertPreview(){
+    $('#certName').textContent = $('#certStudent').value || 'اسم الطالبة';
+    $('#certTeacherOut').textContent = $('#certTeacher').value || 'اسم المعلمة';
+    $('#certDateOut').textContent = $('#certDate').value || '____ / ____ / ____';
+  }
+  ['certStudent','certTeacher','certDate'].forEach(id=>{
+    document.addEventListener('input', (e)=>{ if(e.target && e.target.id===id) updateCertPreview(); });
+  });
+
+  function render(){
+    if(state.section==='home') renderHome();
+    else if(state.section==='lesson') Lesson.mount();
+    else if(state.section==='objectives') Objectives.mount();
+    else if(state.section==='games') Games.mount();
+    else if(state.section==='quiz') Quiz.mount();
+  }
+
+  // Initial render
+  render();
+})();
+</script>
+  <footer class="app-footer">برمجة :أ/ فاطمة هزازي ,ملتقى معلمي ومعلمات الرياضيات ,ملتقى التعليم التفاعلي</footer>
+</body>
+</html>
